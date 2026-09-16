@@ -1,0 +1,57 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Create Android project
+        run: |
+          if [ ! -d "android" ]; then
+            flutter create --platforms=android --org com.eggpam --project-name egg_pam_controller .
+          fi
+
+      - name: Setup App Icon
+        run: |
+          flutter pub add flutter_launcher_icons --dev
+          echo "
+          flutter_launcher_icons:
+            android: true
+            ios: false
+            image_path: 'app_icon.png'
+          " >> pubspec.yaml
+          if [ -f "app_icon.png" ]; then
+            flutter pub run flutter_launcher_icons
+          else
+            echo "Warning: ยังไม่มีไฟล์ app_icon.png ระบบจะใช้ไอคอนมาตรฐานแทนก่อน"
+          fi
+
+      - name: Get packages and Build
+        run: |
+          flutter clean
+          flutter pub get
+          flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ESP32-EGG-PAM-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
