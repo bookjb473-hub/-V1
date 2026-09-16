@@ -1,19 +1,47 @@
-name: egg_pam_controller
-description: "A new Flutter project for PSRU Egg Pam Controller."
-publish_to: 'none'
-version: 1.0.0+1
+name: Build Android APK
 
-environment:
-  sdk: '>=3.0.0 <4.0.0'
+on:
+  workflow_dispatch:
 
-dependencies:
-  flutter:
-    sdk: flutter
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^3.0.0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-flutter:
-  uses-material-design: true
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Create Android project
+        run: |
+          if [ ! -d "android" ]; then
+            flutter create --platforms=android --org com.project --project-name egg_pam_controller .
+          fi
+
+      # ระบบจะทำการเติมบลูทูธลงในไฟล์ pubspec.yaml ให้เองโดยอัตโนมัติอย่างถูกต้อง 100%
+      - name: Auto Add Bluetooth Plugin
+        run: |
+          flutter pub add flutter_blue_plus
+
+      - name: Get packages and Build
+        run: |
+          flutter clean
+          flutter pub get
+          flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ESP32-EGG-PAM-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
