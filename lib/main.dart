@@ -128,7 +128,7 @@ class _ControllerPageState extends State<ControllerPage> {
                       borderRadius: BorderRadius.circular(25),
                       boxShadow: [
                         BoxShadow(color: Colors.cyan.withOpacity(0.15), blurRadius: 10, spreadRadius: 2),
-                        BoxShadow(color: Colors.magenta.withOpacity(0.15), blurRadius: 10, spreadRadius: 2),
+                        BoxShadow(color: Colors.purple.withOpacity(0.15), blurRadius: 10, spreadRadius: 2), // แก้ไขจาก magenta เป็น purple เรียบร้อย
                       ],
                     ),
                     child: Padding(
